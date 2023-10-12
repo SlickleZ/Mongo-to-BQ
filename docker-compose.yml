@@ -1,0 +1,116 @@
+version: "3.6"
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.2.2
+    hostname: zookeeper
+    container_name: zookeeper
+    networks:
+      - localnet
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    restart: always
+
+  broker:
+    image: confluentinc/cp-kafka:7.2.2
+    hostname: broker
+    container_name: broker
+    ports:
+      - "29092:29092"
+    depends_on:
+      - zookeeper
+    networks:
+      - localnet
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENERS: LISTENER_1://broker:29092,LISTENER_2://broker:9092
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_1://broker:29092,LISTENER_2://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_1:PLAINTEXT,LISTENER_2:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      CONFLUENT_SUPPORT_CUSTOMER_ID: "anonymous"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    restart: always
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    container_name: kafdrop
+    restart: always
+    ports:
+      - "9000:9000"
+    networks:
+      - localnet
+    environment:
+      KAFKA_BROKERCONNECT: "broker:29092"
+      JMX_PORT: 35000
+      JVM_OPTS: "-Xms32M -Xmx64M"
+      HOST: localhost
+    depends_on:
+      - "broker"
+
+  mongodb:
+    image: "mongodb-kafka:1.0"
+    container_name: mongodb
+    hostname: mongodb
+    build:
+      context: .
+      dockerfile: mongo.Dockerfile
+    ports:
+      - "27017:27017"
+    depends_on:
+      - zookeeper
+      - broker
+    networks:
+      - localnet
+    volumes:
+      - mongo-data:/data/db
+    command: --replSet rs0 --oplogSize 128
+    restart: always
+
+  mongodb-setup:
+    image: "mongodb-kafka-setup:1.0"
+    container_name: mongodb-setup
+    build:
+      context: .
+      dockerfile: mongo.Dockerfile
+    depends_on:
+      - mongodb
+    networks:
+      - localnet
+    entrypoint:
+      [
+        "bash",
+        "-c",
+        "sleep 5 && mongosh --host mongodb:27017 config-replica.js",
+      ]
+    restart: "no"
+
+  kafka-producer:
+    image: "kafka-producer:1.0"
+    container_name: kafka-producer
+    build:
+        context: ./streaming/
+        dockerfile: producer.Dockerfile
+    networks:
+      - localnet
+    entrypoint: [
+        "python",
+        "/producer/producer.py",
+    ]
+    restart: always
+    depends_on:
+      mongodb-setup:
+        condition: service_completed_successfully
+
+
+networks:
+  localnet:
+    attachable: true
+
+volumes:
+  mongo-data:
+  kafka-data:
