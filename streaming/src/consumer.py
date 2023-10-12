@@ -1,17 +1,18 @@
-from kafka import KafkaConsumer
+from kafka import KafkaConsumer, TopicPartition
 import json
-import logging
 
 
-_logger = logging.getLogger(__name__)
-
-if __name__ == "__main__":
+try:
+    print("Starting the consumer...")
     consumer = KafkaConsumer(
         "lottery.preference", 
-        bootstrap_servers=['broker:9092'],
-        auto_offset_reset="earliest",
+        bootstrap_servers=["broker:29092"],
+        auto_commit_interval_ms=500,
         group_id="consumer-group-bq")
-    _logger.info("Starting the consumer...")
+
     for msg in consumer:
         msg_json = json.loads(msg.value)
-        print(f"Registered User: {msg_json.get('name')}, Address: {msg_json.get('address')}")
+        print(f"Message received: {msg_json}")
+        print(f"The last committed offset: {consumer.committed(TopicPartition('lottery.preference', 0))}")
+except Exception as e:
+    print(e)

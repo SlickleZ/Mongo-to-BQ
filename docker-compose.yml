@@ -95,10 +95,13 @@ services:
     build:
         context: ./streaming/
         dockerfile: producer.Dockerfile
+    environment:
+      PYTHONUNBUFFERED: 1
     networks:
       - localnet
     entrypoint: [
         "python",
+        "-u",
         "/producer/producer.py",
     ]
     restart: always
@@ -106,6 +109,25 @@ services:
       mongodb-setup:
         condition: service_completed_successfully
 
+  kafka-consumer:
+    image: "kafka-consumer:1.0"
+    container_name: kafka-consumer
+    build:
+        context: ./streaming/
+        dockerfile: consumer.Dockerfile
+    environment:
+      PYTHONUNBUFFERED: 1
+    networks:
+      - localnet
+    entrypoint: [
+        "python",
+        "-u",
+        "/consumer/consumer.py",
+    ]
+    restart: always
+    depends_on:
+      mongodb-setup:
+        condition: service_completed_successfully
 
 networks:
   localnet:
