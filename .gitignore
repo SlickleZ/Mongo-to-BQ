@@ -2,3 +2,6 @@ env
 .env
 gsa.json
 mem.txt
+__pycache__
+batch/logs/*
+!batch/logs/.gitkeep

@@ -1,5 +1,4 @@
 pymongo
 kafka-python
 google-cloud-bigquery
-pandas
 dnspython
