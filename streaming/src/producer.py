@@ -25,14 +25,16 @@ try:
         for change in stream:
             json_change = json.loads(dumps(change))
             producer.send("lottery.preference", json_change.get("fullDocument"))
+            print(f"Send data: {json_change.get('fullDocument')} to topic: lottery.preference successfully.")
             resume_token = stream.resume_token
 except PyMongoError:
     if resume_token is None:
         print("There is no usable resume token because there was a failure during ChangeStream initialization.")
     else:
         with db.preference.watch(pipeline=pipeline, resume_after=resume_token) as stream:
-            print("Producer is currently watching ...")
+            print("Producer is currently watching again ...")
             
             for change in stream:
                 json_change = json.loads(dumps(change))
                 producer.send("lottery.preference", json_change.get("fullDocument"))
+                print(f"Send data: {json_change.get('fullDocument')} to topic: lottery.preference successfully.")

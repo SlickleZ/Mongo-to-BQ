@@ -117,6 +117,7 @@ services:
         dockerfile: consumer.Dockerfile
     environment:
       PYTHONUNBUFFERED: 1
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID:-yourproject}
     networks:
       - localnet
     entrypoint: [
