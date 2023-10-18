@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>lOtter</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <link rel="stylesheet" href="static/css/general.css">
+        <link rel="icon" type="image/x-icon" href="static/resources/otter.png">
+    </head>
+    <body>
+
+        <div class="d-lg-flex container-xl my-4 p-3 justify-content-evenly align-items-center flex-column">
+            <img src="static/resources/otter.png" width="8%" height="8%" />
+            <p class="container-xl fs-1 text fw-bold lottery-title">lOtter: The best of Lottery generator!</p>
+        </div>
+
+        <div class="dropdown container-xl d-lg-flex justify-content-center align-items-center">
+            <span class="inline_label me-3">Please select your username</span>
+            <button id="user-dropdown" class="btn btn-secondary dropdown-toggle fs-6 text fw-light text-light bg-primary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Username
+            </button>
+            <ul class="dropdown-menu bg-primary">
+              <li><button id="user1" class="dropdown-item fs-6 text fw-light text-light bg-primary" type="button">SlickleZ</button></li>
+              <li><button id="user2" class="dropdown-item fs-6 text fw-light text-light bg-primary" type="button">QUINTHR4X</button></li>
+              <li><button id="user3" class="dropdown-item fs-6 text fw-light text-light bg-primary" type="button">SHEPHERD</button></li>
+              <li><button id="user4" class="dropdown-item fs-6 text fw-light text-light bg-primary" type="button">JustatimE</button></li>
+              <li><button id="user5" class="dropdown-item fs-6 text fw-light text-light bg-primary" type="button">i3al3ySta12</button></li>
+            </ul>
+        </div>
+        
+        <div class="d-lg-flex justify-content-center align-items-center mt-5 flex-column">
+            <div id="random-header" class="fs-5 text fw-light text-light"></div>
+            <div id="random-number" class="fs-1 text fw-bold text-light">Let's random!</div>
+            <button  type="button" id="random-btn" class="btn btn-primary btn-success mt-4">Random</button>
+        </div>
+
+        <div id="preference-div" class="container-xl d-lg-flex justify-content-center align-items-center mt-5 flex-column">
+            <p>Like This number?</p>
+            <div class="container-xl d-lg-flex justify-content-center align-items-center">
+                <button id="like-btn" type="button" class="btn btn-primary mx-3"> Like </button>
+                <button id="dislike-btn" type="button" class="btn btn-danger mx-3"> Dislike </button>
+            </div>
+        </div>
+
+    </body>
+
+    {% comment %} General script {% endcomment %}
+    <script>
+        document.getElementById("preference-div").style.visibility = "hidden";
+    </script>
+
+    {% comment %} Random button click event {% endcomment %}
+    <script>
+        document.getElementById("random-btn").addEventListener("click", function() {
+            document.getElementById("user-dropdown").disabled = true;
+
+            const userName = document.getElementById("user-dropdown").textContent
+
+            fetch("/rand_number/" + userName)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status == 200) {
+                        document.getElementById("random-header").textContent = "Congratulation! " + data.user_name + " your number is"
+                        document.getElementById("random-number").textContent = data.rand_number;
+                        document.getElementById("preference-div").style.visibility = "visible";  
+                    } else {
+                        document.getElementById("random-header").textContent = ""
+                        document.getElementById("random-number").textContent = "Please select the username";
+                        document.getElementById("user-dropdown").disabled = false;
+                    }
+                });
+                  
+        });
+    </script>
+
+    {% comment %} Like and dislike button click event {% endcomment %}
+    <script>
+        document.getElementById("like-btn").addEventListener("click", function() {
+            document.getElementById("user-dropdown").disabled = false;
+
+            const userName = document.getElementById("user-dropdown").textContent
+            const lottery_number = document.getElementById("random-number").textContent
+
+            fetch("/preference/" + userName + "&" + lottery_number + "&1")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("preference-div").style.visibility = "hidden";
+                });
+        });
+
+        document.getElementById("dislike-btn").addEventListener("click", function() {
+            document.getElementById("user-dropdown").disabled = false;
+
+            const userName = document.getElementById("user-dropdown").textContent
+            const lottery_number = document.getElementById("random-number").textContent
+
+            fetch("/preference/" + userName + "&" + lottery_number + "&0")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("preference-div").style.visibility = "hidden";
+                });
+        });
+    </script>
+
+    {% comment %} Select user dropdown click event {% endcomment %}
+    <script>
+        document.getElementById("user1").addEventListener("click", function() {
+            document.getElementById("user-dropdown").textContent = "SlickleZ";
+        });
+
+        document.getElementById("user2").addEventListener("click", function() {
+            document.getElementById("user-dropdown").textContent = "QUINTHR4X";
+        });
+
+        document.getElementById("user3").addEventListener("click", function() {
+            document.getElementById("user-dropdown").textContent = "SHEPHERD";
+        });
+
+        document.getElementById("user4").addEventListener("click", function() {
+            document.getElementById("user-dropdown").textContent = "JustatimE";
+        });
+
+        document.getElementById("user5").addEventListener("click", function() {
+            document.getElementById("user-dropdown").textContent = "i3al3ySta12";
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</html>

@@ -4,9 +4,13 @@ from datetime import datetime, timedelta
 from google.cloud import bigquery
 from google.oauth2 import service_account
 from os import getenv
+import pytz
 
 
 def load_mongo_to_bq(execution_date, **context):
+    UTC = pytz.timezone("UTC")
+    bangkok_tz = pytz.timezone("Asia/Bangkok")
+    
     # BigQuery config
     SCOPES = ["https://www.googleapis.com/auth/bigquery"]
     SERVICE_ACCOUNT_FILE = "/opt/airflow/dags/gsa.json"
@@ -33,18 +37,19 @@ def load_mongo_to_bq(execution_date, **context):
 
         prev_execution_date = execution_date - timedelta(hours=24)
         print(f"Load data for date: {prev_execution_date}")
-        data_to_load = db.logs.find({
+        query_data = db.logs.find({
             "created_timestamp": {
-                "$gte": prev_execution_date,
-                "$lt": execution_date
+                "$gte": prev_execution_date.astimezone(pytz.utc),
+                "$lt": execution_date.astimezone(pytz.utc)
             }
         })
 
         list_of_data = []
-        for data in data_to_load:
+        for data in query_data:
             data["_id"] = str(data["_id"])
             data["lottery_number"] = str(data["lottery_number"])
-            data["created_timestamp"] = data["created_timestamp"].strftime("%Y-%m-%d %H:%M:%S")
+            timestamp_bangkok = UTC.localize(data["created_timestamp"]).astimezone(bangkok_tz)
+            data["created_timestamp"] = timestamp_bangkok.strftime("%Y-%m-%d %H:%M:%S")
             list_of_data.append(data)
         print(f"Result: {list_of_data}")
 

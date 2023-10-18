@@ -392,6 +392,27 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
+
+# --------------------------------------- Web app ---------------------------------------
+  lottery-app:
+    image: "lottery-app:1.0"
+    container_name: lottery-app
+    build:
+        context: ./web/
+        dockerfile: Dockerfile
+    environment:
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "8000:8000"
+    networks:
+      - localnet
+    restart: always
+    depends_on:
+      mongodb-setup:
+        condition: service_completed_successfully
+      airflow-init:
+        condition: service_completed_successfully
+
 networks:
   localnet:
     attachable: true

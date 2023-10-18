@@ -30,7 +30,8 @@ try:
     for msg in consumer:
         msg_json = [json.loads(msg.value)]
         msg_json[0]["_id"] = msg_json[0]["_id"]["$oid"]
-        msg_json[0]["event_timestamp"] = datetime.now(tz=ZoneInfo("Asia/Bangkok")).strftime("%Y-%m-%d %H:%M:%S")
+        timestamp_bangkok = datetime.strptime(msg_json[0]["event_timestamp"]["$date"], "%Y-%m-%dT%H:%M:%S.%fZ").astimezone(ZoneInfo("Asia/Bangkok"))
+        msg_json[0]["event_timestamp"] = timestamp_bangkok.strftime("%Y-%m-%d %H:%M:%S")
 
         print(f"Message received: {msg_json}")
         print(f"The last committed offset: {consumer.committed(TopicPartition('lottery.preference', 0))}")
