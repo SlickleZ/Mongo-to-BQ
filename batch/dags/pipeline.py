@@ -17,7 +17,7 @@ default_args = {
 dag = DAG(
     dag_id="load_lottery_logs",
     default_args=default_args,
-    schedule_interval=None,
+    schedule_interval="@daily",
     catchup=False,
     start_date=datetime.now() - timedelta(days=1),
     tags=["mongodb", "bigquery"]
