@@ -6,4 +6,4 @@ The demonstration to build a data pipeline from MongoDB to BigQuery in a Batch a
 
 **Language:** Python
 
-**Tools:** Airflow, MongoDB, BigQuery, Kafka
+**Tools:** Airflow, MongoDB, BigQuery, Kafka, Docker
