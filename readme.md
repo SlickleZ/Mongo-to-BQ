@@ -15,6 +15,8 @@ lOtter is the lottery number generator app that helps the user decide what lotte
 * **Batch way**: Work with data that user random number. The MongoDB to BigQuery pipeline controlled by Airflow with daily scheduled.
 * **Streaming way**: Work with like/dislike event. Stream data from MongoDB to BigQuery through Kafka.
 
+All services run on Docker Compose.
+
 ## 📸 Screenshots
 
 ![App Screenshot](https://raw.githubusercontent.com/SlickleZ/Mongo-to-BQ/main/resources/res01.png)
